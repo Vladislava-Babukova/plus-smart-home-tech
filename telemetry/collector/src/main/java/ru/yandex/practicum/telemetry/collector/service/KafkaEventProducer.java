@@ -8,11 +8,12 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.telemetry.collector.config.KafkaProducerProperties;
 
+import java.time.Duration;
 import java.util.Properties;
 
 @Component
 public class KafkaEventProducer {
-
+    private static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(30);
     private final KafkaProducerProperties kafkaProducerProperties;
     private Producer<String, SpecificRecordBase> producer;
 
@@ -50,7 +51,12 @@ public class KafkaEventProducer {
 
     public void stop() {
         if (producer != null) {
-            producer.close();
+            try {
+                producer.flush();
+                producer.close(CLOSE_TIMEOUT);
+            } finally {
+                producer = null;
+            }
         }
     }
 }
