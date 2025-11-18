@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.telemetry.collector.model.hub.HubEvent;
 import ru.yandex.practicum.telemetry.collector.model.sensor.SensorEvent;
 import ru.yandex.practicum.telemetry.collector.service.EventService;
-
+@GrpcService
 @Slf4j
 @RestController
 @Validated
