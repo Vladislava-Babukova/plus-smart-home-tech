@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import ru.yandex.practicum.telemetry.collector.model.ErrorEventType;
 
 import java.time.Instant;
@@ -27,6 +25,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
+@Deprecated
 public abstract class SensorEvent {
 
     @NotBlank

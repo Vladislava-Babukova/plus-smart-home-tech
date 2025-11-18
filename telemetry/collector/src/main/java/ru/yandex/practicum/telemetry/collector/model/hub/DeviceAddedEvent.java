@@ -11,6 +11,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@Deprecated
 public class DeviceAddedEvent extends HubEvent {
     @NotBlank
     private String id;

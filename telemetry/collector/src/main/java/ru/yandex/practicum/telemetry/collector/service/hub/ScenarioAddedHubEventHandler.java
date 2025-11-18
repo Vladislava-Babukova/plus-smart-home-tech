@@ -2,10 +2,9 @@ package ru.yandex.practicum.telemetry.collector.service.hub;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.ScenarioAddedEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
-import ru.yandex.practicum.telemetry.collector.model.hub.HubEvent;
-import ru.yandex.practicum.telemetry.collector.model.hub.HubEventType;
-import ru.yandex.practicum.telemetry.collector.model.hub.ScenarioAddedEvent;
 import ru.yandex.practicum.telemetry.collector.service.KafkaEventProducer;
 
 import static ru.yandex.practicum.telemetry.collector.service.hub.mapper.ClassToAvroMapper.mapActionsToAvro;
@@ -20,17 +19,17 @@ public class ScenarioAddedHubEventHandler extends BaseHubEventHandler<ScenarioAd
     }
 
     @Override
-    protected ScenarioAddedEventAvro mapToAvro(HubEvent hubEvent) {
-        ScenarioAddedEvent event = (ScenarioAddedEvent) hubEvent;
+    protected ScenarioAddedEventAvro mapToAvro(HubEventProto hubEvent) {
+        ScenarioAddedEventProto event = hubEvent.getScenarioAdded();
         return ScenarioAddedEventAvro.newBuilder()
                 .setName(event.getName())
-                .setConditions(mapConditionsToAvro(event.getConditions()))
-                .setActions(mapActionsToAvro(event.getActions()))
+                .setConditions(mapConditionsToAvro(event.getConditionList()))
+                .setActions(mapActionsToAvro(event.getActionList()))
                 .build();
     }
 
     @Override
-    public HubEventType getMessageType() {
-        return HubEventType.SCENARIO_ADDED;
+    public HubEventProto.PayloadCase getMessageType() {
+        return HubEventProto.PayloadCase.SCENARIO_ADDED;
     }
 }

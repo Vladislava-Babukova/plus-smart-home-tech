@@ -1,11 +1,13 @@
 package ru.yandex.practicum.telemetry.collector.service;
 
+
 import jakarta.annotation.PreDestroy;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer;
 import ru.yandex.practicum.telemetry.collector.config.KafkaProducerProperties;
 
 import java.time.Duration;
