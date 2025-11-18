@@ -9,6 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@Deprecated
 public class DeviceAction {
     private String sensorId;
     private DeviceActionType type;
