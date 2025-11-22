@@ -1,0 +1,28 @@
+logging:
+  level:
+    ru.yandex.practicum.telemetry: TRACE
+    org:
+      springframework: ERROR
+      springframework.cloud.netflix.eureka: INFO
+      apache.kafka: WARN
+
+aggregator:
+  kafka:
+    bootstrap-servers: "localhost:9092"
+    producer:
+      properties:
+        "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
+        "key.serializer": "org.apache.kafka.common.serialization.StringSerializer"
+        "value.serializer": "ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer"
+        "linger.ms": 0
+      topic: "telemetry.snapshots.v1"
+
+    consumer:
+      properties:
+        "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
+        "enable.auto.commit": false
+        "group.id": "telemetry.aggregator.sensors"
+        "key.deserializer": "org.apache.kafka.common.serialization.StringDeserializer"
+        "value.deserializer": "ru.yandex.practicum.kafka.deserializer.SensorEventDeserializer"
+      topic: "telemetry.sensors.v1"
+      poll-timeout: 100ms
