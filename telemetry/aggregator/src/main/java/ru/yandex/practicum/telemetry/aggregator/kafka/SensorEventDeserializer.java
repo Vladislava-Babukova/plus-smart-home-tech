@@ -1,4 +1,4 @@
-package ru.yandex.practicum.telemetry.aggregator;
+package ru.yandex.practicum.telemetry.aggregator.kafka;
 
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.avro.io.DecoderFactory;
@@ -6,7 +6,6 @@ import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.io.Decoder;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Map;
 
