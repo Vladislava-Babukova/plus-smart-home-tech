@@ -1,4 +1,6 @@
 package ru.yandex.practicum.telemetry.collector.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
