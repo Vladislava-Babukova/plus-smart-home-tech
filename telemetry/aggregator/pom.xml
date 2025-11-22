@@ -44,7 +44,6 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -64,8 +63,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-
-
         </plugins>
     </build>
 

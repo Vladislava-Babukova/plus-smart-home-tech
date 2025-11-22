@@ -23,7 +23,6 @@ aggregator:
         "enable.auto.commit": false
         "group.id": "telemetry.aggregator.sensors"
         "key.deserializer": "org.apache.kafka.common.serialization.StringDeserializer"
-        "value.deserializer": "io.confluent.kafka.serializers.KafkaAvroDeserializer"
-        "specific.avro.reader": "true"
+        "value.deserializer": "package ru.yandex.practicum.telemetry.aggregator;"
       topic: "telemetry.sensors.v1"
       poll-timeout: 100ms
