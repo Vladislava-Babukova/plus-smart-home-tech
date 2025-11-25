@@ -13,7 +13,6 @@ public class SensorEventDeserializer implements Deserializer<SensorEventAvro> {
 
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
-        // Nothing to configure
     }
 
     @Override
@@ -32,6 +31,5 @@ public class SensorEventDeserializer implements Deserializer<SensorEventAvro> {
 
     @Override
     public void close() {
-        // Nothing to close
     }
 }

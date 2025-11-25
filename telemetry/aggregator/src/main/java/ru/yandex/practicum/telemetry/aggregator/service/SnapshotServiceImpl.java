@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class SnapshotServiceImpl implements SnapshotService{
-    //Хранилище HubId - Снэпшот состояния
+
     private final Map<String, SensorsSnapshotAvro> sensorsSnapshotAvroMap = new HashMap<>();
 
     @Override
@@ -29,7 +29,7 @@ public class SnapshotServiceImpl implements SnapshotService{
                         .setSensorsState(new HashMap<>())
                         .build()
         );
-        //Из снэпшота текущего хаба берем мапу с данными всех датчиков
+
         Map<String, SensorStateAvro> sensorsState = snapshot.getSensorsState();
 
         if(sensorsState.containsKey(event.getId())) {
