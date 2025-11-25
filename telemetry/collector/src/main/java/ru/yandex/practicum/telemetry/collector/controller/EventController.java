@@ -1,6 +1,5 @@
 package ru.yandex.practicum.telemetry.collector.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -35,7 +34,7 @@ public class EventController extends CollectorControllerGrpc.CollectorController
     @Override
     public void collectSensorEvent(SensorEventProto request, StreamObserver<Empty> responseObserver) {
         try {
-            if(sensorEventHandlers.containsKey(request.getPayloadCase())) {
+            if (sensorEventHandlers.containsKey(request.getPayloadCase())) {
                 sensorEventHandlers.get(request.getPayloadCase()).handle(request);
             } else {
                 throw new IllegalArgumentException("Подходящий обработчик для события датчика " + request.getPayloadCase()
@@ -55,7 +54,7 @@ public class EventController extends CollectorControllerGrpc.CollectorController
     @Override
     public void collectHubEvent(HubEventProto request, StreamObserver<Empty> responseObserver) {
         try {
-            if(hubEventHandlers.containsKey(request.getPayloadCase())) {
+            if (hubEventHandlers.containsKey(request.getPayloadCase())) {
                 hubEventHandlers.get(request.getPayloadCase()).handle(request);
             } else {
                 throw new IllegalArgumentException("Подходящий обработчик для события хаба " + request.getPayloadCase()
