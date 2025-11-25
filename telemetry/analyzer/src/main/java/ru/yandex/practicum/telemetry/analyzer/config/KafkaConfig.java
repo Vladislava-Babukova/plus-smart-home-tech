@@ -18,7 +18,7 @@ public class KafkaConfig {
 
     public KafkaConfig(Map<String, String> commonProperties, List<ConsumerConfig> consumers) {
         this.consumers = consumers.stream()
-                .peek( config -> {
+                .peek(config -> {
                             Properties mergedProps = new Properties();
                             mergedProps.putAll(commonProperties);
                             mergedProps.putAll(config.getProperties());
