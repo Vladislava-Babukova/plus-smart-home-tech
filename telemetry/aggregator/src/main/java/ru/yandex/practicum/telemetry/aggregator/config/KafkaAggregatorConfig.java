@@ -31,5 +31,4 @@ public class KafkaAggregatorConfig {
         private String topic;
         private Duration pollTimeout;
     }
-
 }

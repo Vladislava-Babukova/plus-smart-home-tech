@@ -44,7 +44,6 @@ public class AggregationStarter {
         this.consumer = new KafkaConsumer<>(consumerConfig.getProperties());
         this.producer = new KafkaProducer<>(producerConfig.getProperties());
 
-        // регистрируем хук, в котором вызываем метод wakeup.
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Сработал хук на завершение JVM. Прерываю работу консьюмера.");
             consumer.wakeup();
@@ -61,29 +60,19 @@ public class AggregationStarter {
                 for (ConsumerRecord<String, SensorEventAvro> record : records) {
                     log.trace("Обработка сообщения от хаба {} из партиции {} с офсетом {}.",
                             record.key(), record.partition(), record.offset());
-                    // обрабатываем очередную запись
                     handleRecord(record.value());
-                    // фиксируем оффсеты обработанных записей, если нужно
                     manageOffsets(record, count, consumer);
                     count++;
                 }
                 producer.flush();
-                // фиксируем максимальный оффсет обработанных записей
                 consumer.commitAsync();
             }
         } catch (WakeupException ignores) {
-            // игнорируем - закрываем консьюмер и продюсер в блоке finally
         } catch (Exception e) {
             log.error("Ошибка во время обработки событий от датчиков", e);
         } finally {
             try {
-                // Перед тем, как закрыть продюсер и консьюмер, нужно убедится,
-                // что все сообщения, лежащие в буффере, отправлены и
-                // все оффсеты обработанных сообщений зафиксированы
-
-                // здесь нужно вызвать метод продюсера для сброса данных в буффере
                 producer.flush();
-                // здесь нужно вызвать метод консьюмера для фиксиции смещений
                 consumer.commitSync(currentOffsets);
 
             } finally {
@@ -97,7 +86,6 @@ public class AggregationStarter {
 
     private static void manageOffsets(ConsumerRecord<String, SensorEventAvro> record, int count,
                                       KafkaConsumer<String, SensorEventAvro> consumer) {
-        // обновляем текущий оффсет для топика-партиции
         currentOffsets.put(
                 new TopicPartition(record.topic(), record.partition()),
                 new OffsetAndMetadata(record.offset() + 1)
