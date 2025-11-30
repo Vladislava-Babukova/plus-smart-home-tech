@@ -1,7 +1,7 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: TRUE
@@ -9,16 +9,22 @@ spring:
           time_zone: UTC
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
   sql:
     init:
-      mode: always
-
+      mode: never
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/analyzer
     username: db
     password: db
+  task:
+    execution:
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+
+server:
+  shutdown: graceful
 
 logging:
   level:

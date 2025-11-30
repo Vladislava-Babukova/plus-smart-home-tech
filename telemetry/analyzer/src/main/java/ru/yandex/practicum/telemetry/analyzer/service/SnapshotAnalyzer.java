@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.telemetry.analyzer.dal.model.Condition;
 import ru.yandex.practicum.telemetry.analyzer.dal.model.Scenario;
+import ru.yandex.practicum.telemetry.analyzer.dal.repository.ConditionRepository;
 import ru.yandex.practicum.telemetry.analyzer.dal.repository.ScenarioRepository;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SnapshotAnalyzer {
     private final ScenarioRepository scenarioRepository;
+    private final ConditionRepository conditionRepository;
 
     public List<Scenario> analyze(String hubId, SensorsSnapshotAvro sensorsSnapshotAvro) {
         List<Scenario> allScenarios = scenarioRepository.findByHubId(hubId);
@@ -34,15 +36,11 @@ public class SnapshotAnalyzer {
     }
 
     private boolean checkScenarioConditions(Scenario scenario, SensorsSnapshotAvro snapshot) {
-        Map<String, Condition> conditions = scenario.getConditions();
-        if (conditions.isEmpty()) {
-            return true;
-        }
-
-        for (Map.Entry<String, Condition> conditionEntry : conditions.entrySet()) {
-            String sensorId = conditionEntry.getKey();
-            Condition condition = conditionEntry.getValue();
-            if (!checkCondition(sensorId, condition, snapshot)) {
+        for (Map.Entry<String, Long> entry : scenario.getConditionIds().entrySet()) {
+            String sensorId = entry.getKey();
+            Long conditionId = entry.getValue();
+            Condition condition = conditionRepository.findById(conditionId).orElse(null);
+            if (condition == null || !checkCondition(sensorId, condition, snapshot)) {
                 return false;
             }
         }

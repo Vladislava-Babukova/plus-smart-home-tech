@@ -1,102 +1,137 @@
 package ru.yandex.practicum.telemetry.analyzer.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
-import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
+import ru.yandex.practicum.telemetry.analyzer.config.KafkaConfig;
 import ru.yandex.practicum.telemetry.analyzer.dal.model.Scenario;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Slf4j
-@Service
-@RequiredArgsConstructor
-public class SnapshotProcessor {
+@Component
+public class SnapshotProcessor implements DisposableBean {
 
+    private final KafkaConsumer<String, SensorsSnapshotAvro> consumer;
+    private final List<String> topics;
+    private final Duration pollTimeout;
     private final SnapshotAnalyzer snapshotAnalyzer;
     private final GrpcClientService grpcClientService;
-    private final KafkaConsumer<String, SensorsSnapshotAvro> consumer;
 
-    @EventListener(ApplicationReadyEvent.class)
+    private volatile boolean running = false;
+    private Future<?> consumerFuture;
+
+    public SnapshotProcessor(KafkaConfig config,
+                             SnapshotAnalyzer snapshotAnalyzer,
+                             GrpcClientService grpcClientService) {
+
+        KafkaConfig.ConsumerConfig consumerConfig = config.getConsumers().get("SnapshotProcessor");
+
+        this.consumer = new KafkaConsumer<>(consumerConfig.getProperties());
+        this.topics = consumerConfig.getTopics();
+        this.pollTimeout = consumerConfig.getPollTimeout();
+        this.snapshotAnalyzer = snapshotAnalyzer;
+        this.grpcClientService = grpcClientService;
+    }
+
+    @PostConstruct
     public void start() {
-        CompletableFuture.runAsync(() -> {
-            Thread.currentThread().setName("SnapshotProcessorThread");
+        log.info("Запуск SnapshotProcessor для топика: {}", topics);
+        this.running = true;
+        this.consumerFuture = CompletableFuture.runAsync(this::processMessages);
+    }
 
-            try {
-                consumer.subscribe(List.of("telemetry.snapshots.v1"));
-                Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
+    private void processMessages() {
+        try {
+            log.info("Подписываемся на топик: {}", topics);
+            consumer.subscribe(topics);
 
-                while (true) {
-                    ConsumerRecords<String, SensorsSnapshotAvro> records = consumer.poll(Duration.ofMillis(500));
-                    int count = 0;
+            while (running) {
+                ConsumerRecords<String, SensorsSnapshotAvro> records = consumer.poll(pollTimeout);
 
-                    for (ConsumerRecord<String, SensorsSnapshotAvro> record : records) {
-                        log.trace("Обработка сообщения от хаба {} из партиции {} с офсетом {}.",
-                                record.key(), record.partition(), record.offset());
-                        handleRecord(record.value());
-                        manageOffsets(record, count, consumer, currentOffsets);
-                        count++;
-                    }
-                    consumer.commitAsync();
+                if (!records.isEmpty()) {
+                    log.debug("Получено {} снапшотов", records.count());
+                    processRecords(records);
                 }
-            } catch (WakeupException e) {
-                log.info("Получен сигнал завершения работы");
-            } catch (Exception e) {
-                log.error("Ошибка во время обработки событий от хабов", e);
-            } finally {
-                consumer.close();
             }
-        });
+        } catch (WakeupException e) {
+            log.info("Получен сигнал WakeupException. Завершаем работу");
+        } catch (Exception e) {
+            log.error("Ошибка во время обработки снапшотов", e);
+        } finally {
+            shutdown();
+        }
+    }
+
+    private void processRecords(ConsumerRecords<String, SensorsSnapshotAvro> records) {
+        for (ConsumerRecord<String, SensorsSnapshotAvro> record : records) {
+            try {
+                log.trace("Обработка снапшота от хаба {} (partition: {}, offset: {})",
+                        record.key(), record.partition(), record.offset());
+
+                SensorsSnapshotAvro snapshot = record.value();
+                String hubId = snapshot.getHubId();
+
+                List<Scenario> scenarios = snapshotAnalyzer.analyze(hubId, snapshot);
+
+                for (Scenario scenario : scenarios) {
+                    grpcClientService.handleScenario(scenario);
+                }
+
+            } catch (Exception e) {
+                log.error("Ошибка обработки снапшота (hub: {}, partition: {}, offset: {})",
+                        record.key(), record.partition(), record.offset(), e);
+            }
+        }
+        commitOffsetsAsync();
+    }
+
+    private void commitOffsetsAsync() {
+        try {
+            consumer.commitAsync((offsets, exception) -> {
+                if (exception != null) {
+                    log.warn("Ошибка при коммите оффсетов", exception);
+                } else {
+                    log.trace("Оффсеты успешно закоммичены");
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Ошибка при асинхронном коммите", e);
+        }
+    }
+
+    private void shutdown() {
+        log.info("Завершение работы SnapshotProcessor...");
+        try {
+            consumer.commitSync();
+            log.info("Финальные оффсеты закоммичены");
+        } catch (Exception e) {
+            log.error("Ошибка при финальном коммите оффсетов", e);
+        } finally {
+            consumer.close();
+            log.info("Kafka consumer закрыт");
+        }
     }
 
     @PreDestroy
-    public void shutdown() {
+    @Override
+    public void destroy() {
+        log.info("Остановка SnapshotProcessor...");
+        this.running = false;
+
+        if (consumerFuture != null) {
+            consumerFuture.cancel(true);
+        }
         consumer.wakeup();
-    }
-
-    private void manageOffsets(ConsumerRecord<String, SensorsSnapshotAvro> record, int count,
-                               KafkaConsumer<String, SensorsSnapshotAvro> consumer,
-                               Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
-        currentOffsets.put(
-                new TopicPartition(record.topic(), record.partition()),
-                new OffsetAndMetadata(record.offset() + 1)
-        );
-
-        if (count % 100 == 0) {
-            consumer.commitAsync(currentOffsets, this::handleCommitCallback);
-        }
-    }
-
-    private void handleCommitCallback(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
-        if (exception != null) {
-            log.warn("Ошибка во время фиксации оффсетов: {}", offsets, exception);
-        }
-    }
-
-    @Transactional
-    private void handleRecord(SensorsSnapshotAvro sensorsSnapshotAvro) {
-        try {
-            String hubId = sensorsSnapshotAvro.getHubId();
-            List<Scenario> scenarios = snapshotAnalyzer.analyze(hubId, sensorsSnapshotAvro);
-            for (Scenario scenario : scenarios) {
-                grpcClientService.handleScenario(scenario);
-            }
-        } catch (Exception e) {
-            log.error("Ошибка обработки события {}", sensorsSnapshotAvro, e);
-        }
     }
 }

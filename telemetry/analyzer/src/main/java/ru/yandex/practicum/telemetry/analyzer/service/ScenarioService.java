@@ -38,16 +38,15 @@ public class ScenarioService {
             log.warn("Сценарий {} для хаба {} уже существует. Удаляем старый.", scenarioAddedEvent.getName(), hubId);
             scenarioRepository.delete(existingScenario.get());
         }
-
         Scenario scenario = new Scenario();
         scenario.setHubId(hubId);
         scenario.setName(scenarioAddedEvent.getName());
 
-        Map<String, Condition> conditions = processConditions(hubId, scenarioAddedEvent.getConditions());
-        scenario.setConditions(conditions);
+        Map<String, Long> conditionIds = processConditions(hubId, scenarioAddedEvent.getConditions());
+        scenario.setConditionIds(conditionIds);
 
-        Map<String, Action> actions = processActions(hubId, scenarioAddedEvent.getActions());
-        scenario.setActions(actions);
+        Map<String, Long> actionIds = processActions(hubId, scenarioAddedEvent.getActions());
+        scenario.setActionIds(actionIds);
 
         scenarioRepository.save(scenario);
         log.info("Сценарий {} для хаба {} успешно сохранен", scenarioAddedEvent.getName(), hubId);
@@ -59,6 +58,8 @@ public class ScenarioService {
 
         Optional<Scenario> scenario = scenarioRepository.findByHubIdAndName(hubId, scenarioRemovedEvent.getName());
         if (scenario.isPresent()) {
+            deleteRelatedConditionsAndActions(scenario.get());
+
             scenarioRepository.delete(scenario.get());
             log.info("Сценарий {} для хаба {} успешно удален", scenarioRemovedEvent.getName(), hubId);
         } else {
@@ -76,7 +77,6 @@ public class ScenarioService {
             log.warn("Датчик {} уже существует", deviceAddedEvent.getId());
             return;
         }
-
         Sensor sensor = new Sensor();
         sensor.setId(deviceAddedEvent.getId());
         sensor.setHubId(hubId);
@@ -95,7 +95,6 @@ public class ScenarioService {
                 log.warn("Датчик {} не принадлежит хабу {}", deviceRemovedEvent.getId(), hubId);
                 return;
             }
-
             sensorRepository.delete(sensor.get());
             log.info("Датчик {} для хаба {} успешно удален", deviceRemovedEvent.getId(), hubId);
         } else {
@@ -103,9 +102,8 @@ public class ScenarioService {
         }
     }
 
-
-    private Map<String, Condition> processConditions(String hubId, List<ScenarioConditionAvro> conditionsAvro) {
-        Map<String, Condition> conditions = new HashMap<>();
+    private Map<String, Long> processConditions(String hubId, List<ScenarioConditionAvro> conditionsAvro) {
+        Map<String, Long> conditionIds = new HashMap<>();
 
         for (ScenarioConditionAvro conditionAvro : conditionsAvro) {
             Optional<Sensor> sensor = sensorRepository.findByIdAndHubId(conditionAvro.getSensorId(), hubId);
@@ -113,7 +111,6 @@ public class ScenarioService {
                 log.warn("Датчик {} не найден для хаба {}. Пропускаем условие.", conditionAvro.getSensorId(), hubId);
                 continue;
             }
-
             Condition condition = new Condition();
             condition.setType(conditionAvro.getType());
             condition.setOperation(conditionAvro.getOperation());
@@ -122,14 +119,13 @@ public class ScenarioService {
             condition.setValue(value);
 
             Condition savedCondition = conditionRepository.save(condition);
-            conditions.put(conditionAvro.getSensorId(), savedCondition);
+            conditionIds.put(conditionAvro.getSensorId(), savedCondition.getId());
         }
-
-        return conditions;
+        return conditionIds;
     }
 
-    private Map<String, Action> processActions(String hubId, List<DeviceActionAvro> actionsAvro) {
-        Map<String, Action> actions = new HashMap<>();
+    private Map<String, Long> processActions(String hubId, List<DeviceActionAvro> actionsAvro) {
+        Map<String, Long> actionIds = new HashMap<>();
 
         for (DeviceActionAvro actionAvro : actionsAvro) {
             Optional<Sensor> sensor = sensorRepository.findByIdAndHubId(actionAvro.getSensorId(), hubId);
@@ -145,9 +141,19 @@ public class ScenarioService {
             action.setValue(value);
 
             Action savedAction = actionRepository.save(action);
-            actions.put(actionAvro.getSensorId(), savedAction);
+            actionIds.put(actionAvro.getSensorId(), savedAction.getId());
         }
-        return actions;
+        return actionIds;
+    }
+
+    private void deleteRelatedConditionsAndActions(Scenario scenario) {
+        for (Long conditionId : scenario.getConditionIds().values()) {
+            conditionRepository.deleteById(conditionId);
+        }
+
+        for (Long actionId : scenario.getActionIds().values()) {
+            actionRepository.deleteById(actionId);
+        }
     }
 
     private Integer extractValue(Object value) {

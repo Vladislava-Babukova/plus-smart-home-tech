@@ -1,7 +1,7 @@
 package ru.yandex.practicum.telemetry.aggregator.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorStateAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
@@ -11,13 +11,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-@Service
+@RequiredArgsConstructor
 public class SnapshotService {
 
     private final Map<String, SensorsSnapshotAvro> sensorsSnapshotAvroMap = new HashMap<>();
 
     public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
-        // Возвращаем снепшот, а если его нет, то создаем и возвращаем
         final SensorsSnapshotAvro snapshot = sensorsSnapshotAvroMap.computeIfAbsent(
                 event.getHubId(),
                 hubId -> SensorsSnapshotAvro.newBuilder()
