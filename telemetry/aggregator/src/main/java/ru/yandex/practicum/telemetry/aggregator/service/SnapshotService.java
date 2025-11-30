@@ -13,7 +13,6 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class SnapshotService {
-
     private final Map<String, SensorsSnapshotAvro> sensorsSnapshotAvroMap = new HashMap<>();
 
     public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {

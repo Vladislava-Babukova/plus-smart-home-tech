@@ -7,7 +7,6 @@ import ru.yandex.practicum.telemetry.aggregator.service.SnapshotService;
 
 @Configuration
 public class AggregationConfig {
-
     @Bean
     public SnapshotService snapshotService() {
         return new SnapshotService();

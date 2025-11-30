@@ -20,6 +20,5 @@ public class Condition {
 
     @Enumerated(EnumType.STRING)
     private ConditionOperationAvro operation;
-
     private Integer value;
 }

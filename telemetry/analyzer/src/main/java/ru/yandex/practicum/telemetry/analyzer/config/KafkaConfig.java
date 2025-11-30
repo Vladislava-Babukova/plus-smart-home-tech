@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Validated
 public class KafkaConfig {
     private final Map<String, ConsumerConfig> consumers;
-
     public KafkaConfig(
             @Value("#{${analyzer.kafka.common-properties:{}}}") Map<String, String> commonProperties,
             List<ConsumerConfig> consumers) {

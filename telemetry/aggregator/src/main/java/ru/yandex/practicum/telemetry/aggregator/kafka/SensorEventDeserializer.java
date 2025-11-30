@@ -5,7 +5,6 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.kafka.common.serialization.Deserializer;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
-
 import java.io.IOException;
 import java.util.Map;
 

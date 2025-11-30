@@ -19,7 +19,6 @@ public class Analyzer {
 
         CountDownLatch latch = new CountDownLatch(1);
 
-
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Получен сигнал завершения работы");
             latch.countDown();

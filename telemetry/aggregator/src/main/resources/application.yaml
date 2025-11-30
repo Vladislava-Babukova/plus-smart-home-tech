@@ -16,7 +16,6 @@ aggregator:
         "value.serializer": "ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer"
         "linger.ms": 0
       topic: "telemetry.snapshots.v1"
-
     consumer:
       properties:
         "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}

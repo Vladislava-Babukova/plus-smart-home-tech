@@ -112,7 +112,6 @@ public class AggregationStarter implements ApplicationListener<ContextRefreshedE
                 commitOffsetsAsync();
             }
         }
-
         if (processedCount > 0) {
             commitOffsetsAsync();
             producer.flush();

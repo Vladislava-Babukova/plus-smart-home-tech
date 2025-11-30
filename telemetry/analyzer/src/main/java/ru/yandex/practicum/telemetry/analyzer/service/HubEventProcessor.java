@@ -40,7 +40,6 @@ public class HubEventProcessor implements DisposableBean {
 
         Properties consumerProperties = new Properties();
         consumerProperties.putAll(consumerConfig.getProperties());
-
         this.consumer = new KafkaConsumer<>(consumerProperties);
         this.topics = consumerConfig.getTopics();
         this.pollTimeout = consumerConfig.getPollTimeout();

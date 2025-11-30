@@ -113,7 +113,6 @@ public class SnapshotAnalyzer {
         if (sensorValue == null || conditionValue == null) {
             return false;
         }
-
         switch (operation) {
             case EQUALS:
                 return sensorValue.equals(conditionValue);

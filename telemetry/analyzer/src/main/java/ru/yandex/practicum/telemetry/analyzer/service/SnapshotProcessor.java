@@ -128,7 +128,6 @@ public class SnapshotProcessor implements DisposableBean {
     public void destroy() {
         log.info("Остановка SnapshotProcessor...");
         this.running = false;
-
         if (consumerFuture != null) {
             consumerFuture.cancel(true);
         }

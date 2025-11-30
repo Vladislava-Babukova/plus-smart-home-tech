@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS scenarios (
     UNIQUE(hub_id, name)
 );
 
-
 CREATE TABLE IF NOT EXISTS sensors (
     id VARCHAR PRIMARY KEY,
     hub_id VARCHAR

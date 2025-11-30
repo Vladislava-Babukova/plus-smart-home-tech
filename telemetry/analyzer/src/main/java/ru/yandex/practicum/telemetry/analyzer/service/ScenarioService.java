@@ -150,7 +150,6 @@ public class ScenarioService {
         for (Long conditionId : scenario.getConditionIds().values()) {
             conditionRepository.deleteById(conditionId);
         }
-
         for (Long actionId : scenario.getActionIds().values()) {
             actionRepository.deleteById(actionId);
         }
