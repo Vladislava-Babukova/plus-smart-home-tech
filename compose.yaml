@@ -48,3 +48,30 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
+
+  db-init:
+    image: postgres:16.1
+    container_name: db-init
+    depends_on:
+      analyzer-db:
+        condition: service_healthy
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -e
+        echo "Waiting for PostgreSQL to be ready..."
+        # Подключаемся к стандартной БД postgres
+        until psql postgresql://db:db@analyzer-db:5432/postgres -c '\q'; do
+          sleep 1
+        done
+        echo "Creating databases..."
+        psql postgresql://db:db@analyzer-db:5432/postgres -v ON_ERROR_STOP=1 <<-EOSQL
+        create database commerce_shopping_cart;
+        create database commerce_shopping_store;
+        create database commerce_warehouse;
+        create database commerce_order;
+        create database commerce_delivery;
+        create database commerce_payment;
+        EOSQL
+        echo "All databases created successfully!"

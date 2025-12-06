@@ -1,0 +1,58 @@
+server:
+  port: 0
+
+spring:
+  sql:
+    init:
+      mode: always
+  #DB connection
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/commerce_shopping_cart
+    username: db
+    password: db
+    initialization-mode: always
+  jpa:
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc.time_zone: UTC
+        format_sql: true
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        initial-interval: 3000
+        max-attempts: 10
+        max-interval: 10000
+
+logging:
+  level:
+    ru:
+      yandex:
+        practicum: TRACE
+    org:
+      springframework:
+        orm:
+          jpa: DEBUG
+        transaction: DEBUG
+  root: INFO
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 50
+      failureRateThreshold: 50
+  instances:
+    warehouse:
+      slidingWindowSize: 10
+      waitDurationInOpenState: 10000 # 10 секунд в миллисекундах
+      permittedNumberOfCallsInHalfOpenState: 3
+      slidingWindowType: COUNT_BASED
+      minimumNumberOfCalls: 5
+      automaticTransitionFromOpenToHalfOpenEnabled: true
