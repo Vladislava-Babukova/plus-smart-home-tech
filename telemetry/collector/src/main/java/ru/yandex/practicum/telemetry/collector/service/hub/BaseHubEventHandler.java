@@ -5,9 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-import ru.yandex.practicum.telemetry.collector.model.hub.HubEvent;
 import ru.yandex.practicum.telemetry.collector.service.KafkaEventProducer;
+
+import java.time.Instant;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -17,13 +19,13 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
     protected final String topic;
 
     @Override
-    public void handle(HubEvent hubEvent) {
+    public void handle(HubEventProto hubEvent) {
         try {
             Producer<String, SpecificRecordBase> producer = kafkaEventProducer.getProducer();
             T specificAvroEvent = mapToAvro(hubEvent);
             HubEventAvro avroEvent = HubEventAvro.newBuilder()
                     .setHubId(hubEvent.getHubId())
-                    .setTimestamp(hubEvent.getTimestamp())
+                    .setTimestamp(convertTimestampToInstant(hubEvent.getTimestamp()))
                     .setPayload(specificAvroEvent)
                     .build();
             log.info("Начинаю отправку сообщений {} в топик {}", avroEvent, topic);
@@ -43,5 +45,9 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
         }
     }
 
-    protected abstract T mapToAvro(HubEvent hubEvent);
+    protected abstract T mapToAvro(HubEventProto hubEvent);
+
+    private Instant convertTimestampToInstant(com.google.protobuf.Timestamp timestamp) {
+        return Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
+    }
 }
