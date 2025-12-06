@@ -47,7 +47,6 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
 
     protected abstract T mapToAvro(HubEventProto hubEvent);
 
-    // Метод для конвертации protobuf Timestamp в Instant
     private Instant convertTimestampToInstant(com.google.protobuf.Timestamp timestamp) {
         return Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
     }

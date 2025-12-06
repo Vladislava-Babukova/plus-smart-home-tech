@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.time.Duration;
 import java.util.Properties;
 
+
 @ConfigurationProperties(prefix = "aggregator.kafka")
 @Getter
 @AllArgsConstructor
@@ -31,5 +32,4 @@ public class KafkaAggregatorConfig {
         private String topic;
         private Duration pollTimeout;
     }
-
 }

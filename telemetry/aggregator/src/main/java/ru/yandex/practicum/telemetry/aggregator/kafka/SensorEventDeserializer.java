@@ -1,11 +1,10 @@
 package ru.yandex.practicum.telemetry.aggregator.kafka;
 
-import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
-import org.apache.avro.io.Decoder;
+import org.apache.kafka.common.serialization.Deserializer;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
-
 import java.io.IOException;
 import java.util.Map;
 
@@ -13,7 +12,6 @@ public class SensorEventDeserializer implements Deserializer<SensorEventAvro> {
 
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
-        // Nothing to configure
     }
 
     @Override
@@ -32,6 +30,5 @@ public class SensorEventDeserializer implements Deserializer<SensorEventAvro> {
 
     @Override
     public void close() {
-        // Nothing to close
     }
 }
