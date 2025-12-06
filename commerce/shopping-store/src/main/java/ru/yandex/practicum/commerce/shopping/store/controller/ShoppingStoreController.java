@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.commerce.shopping.store.config.Loggable;
 import ru.yandex.practicum.commerce.contract.shopping.store.ShoppingStoreOperations;
 import ru.yandex.practicum.commerce.dto.shopping.store.ProductCategory;
 import ru.yandex.practicum.commerce.dto.shopping.store.ProductDto;
 import ru.yandex.practicum.commerce.dto.shopping.store.QuantityState;
 import ru.yandex.practicum.commerce.dto.shopping.store.SetProductQuantityStateRequest;
+import ru.yandex.practicum.commerce.shopping.store.config.Loggable;
 import ru.yandex.practicum.commerce.shopping.store.service.ShoppingStoreService;
 
 import java.util.UUID;

@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.commerce.dto.shopping.store.ProductCategory;
 import ru.yandex.practicum.commerce.dto.shopping.store.ProductDto;
 import ru.yandex.practicum.commerce.dto.shopping.store.ProductState;
+import ru.yandex.practicum.commerce.dto.shopping.store.SetProductQuantityStateRequest;
 import ru.yandex.practicum.commerce.shopping.store.dal.ProductRepository;
 import ru.yandex.practicum.commerce.shopping.store.exception.ProductNotFoundBusinessException;
 import ru.yandex.practicum.commerce.shopping.store.mapper.ProductMapper;
 import ru.yandex.practicum.commerce.shopping.store.model.ProductEntity;
-import ru.yandex.practicum.commerce.dto.shopping.store.SetProductQuantityStateRequest;
 
-import java.util.*;
+import java.util.UUID;
 
 @Slf4j
 @Service
