@@ -11,6 +11,7 @@ import ru.yandex.practicum.commerce.shopping.cart.dal.ShoppingCartItemRepository
 import ru.yandex.practicum.commerce.shopping.cart.dal.ShoppingCartRepository;
 import ru.yandex.practicum.commerce.shopping.cart.exception.NoProductsInShoppingCartBusinessException;
 import ru.yandex.practicum.commerce.shopping.cart.exception.NotAuthorizedBusinessException;
+import ru.yandex.practicum.commerce.shopping.cart.exception.ProductAvailabilityException;
 import ru.yandex.practicum.commerce.shopping.cart.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.commerce.shopping.cart.model.ShoppingCartEntity;
 import ru.yandex.practicum.commerce.shopping.cart.model.ShoppingCartItemEntity;
@@ -53,11 +54,22 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .build();
 
         try {
+
+            log.debug("Calling warehouse service. CartId: {}, Products: {}",
+                    shoppingCart.getShoppingCartId(), formatProductsForLog(products));
+
             warehouseClient.checkProductQuantityEnoughForShoppingCart(tempCart);
-            log.debug("Products availability confirmed by warehouse");
+
+
+            log.debug("Products availability confirmed by warehouse. CartId: {}, User: {}",
+                    shoppingCart.getShoppingCartId(), username);
+
         } catch (Exception e) {
-            log.error("Failed to check product availability in warehouse: {}", e.getMessage());
-            throw new RuntimeException("Product availability check failed: " + e.getMessage(), e);
+
+            log.error("Failed to check product availability in warehouse. CartId: {}, User: {}, Products: {}",
+                    shoppingCart.getShoppingCartId(), username, formatProductsForLog(products), e);
+
+            throw new ProductAvailabilityException("Product availability check failed: " + e.getMessage(), e);
         }
 
         for (Map.Entry<UUID, Integer> entry : products.entrySet()) {
@@ -83,6 +95,17 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .findByShoppingCart_ShoppingCartId(shoppingCart.getShoppingCartId());
 
         return ShoppingCartMapper.toDto(shoppingCart, updatedItems);
+    }
+
+    private String formatProductsForLog(Map<UUID, Integer> products) {
+        if (products == null || products.isEmpty()) {
+            return "{}";
+        }
+        return products.entrySet().stream()
+                .limit(5)
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(", ", "{",
+                        products.size() > 5 ? "... total " + products.size() + " products}" : "}"));
     }
 
     @Override
@@ -144,14 +167,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
         ShoppingCartEntity shoppingCart = getActiveCartOrThrow(username);
 
-        Optional<ShoppingCartItemEntity> existingItem = shoppingCartItemRepository
-                .findByShoppingCart_ShoppingCartIdAndProductId(shoppingCart.getShoppingCartId(), request.getProductId());
+        ShoppingCartItemEntity item = shoppingCartItemRepository
+                .findByShoppingCart_ShoppingCartIdAndProductId(shoppingCart.getShoppingCartId(), request.getProductId())
+                .orElseThrow(() -> new NoProductsInShoppingCartBusinessException(List.of(request.getProductId())));
 
-        if (existingItem.isEmpty()) {
-            throw new NoProductsInShoppingCartBusinessException(List.of(request.getProductId()));
-        }
-
-        ShoppingCartItemEntity item = existingItem.get();
         item.setQuantity(request.getNewQuantity().intValue());
         shoppingCartItemRepository.save(item);
 

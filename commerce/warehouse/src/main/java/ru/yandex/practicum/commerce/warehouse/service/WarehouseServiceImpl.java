@@ -17,10 +17,8 @@ import ru.yandex.practicum.commerce.warehouse.mapper.WarehouseMapper;
 import ru.yandex.practicum.commerce.warehouse.model.WarehouseProductEntity;
 
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -52,6 +50,13 @@ public class WarehouseServiceImpl implements WarehouseService {
     public BookedProductsDto checkProductQuantityEnoughForShoppingCart(ShoppingCartDto shoppingCartDto) {
         log.debug("Checking product quantity for shopping cart: {}", shoppingCartDto.getShoppingCartId());
 
+        List<UUID> productIds = new ArrayList<>(shoppingCartDto.getProducts().keySet());
+        List<WarehouseProductEntity> products = warehouseProductRepository.findByProductIdIn(productIds);
+
+
+        Map<UUID, WarehouseProductEntity> productMap = products.stream()
+                .collect(Collectors.toMap(WarehouseProductEntity::getProductId, p -> p));
+
         Map<UUID, Integer> insufficientProducts = new HashMap<>();
         double totalWeight = 0.0;
         double totalVolume = 0.0;
@@ -61,8 +66,11 @@ public class WarehouseServiceImpl implements WarehouseService {
             UUID productId = entry.getKey();
             Integer requiredQuantity = entry.getValue();
 
-            WarehouseProductEntity product = warehouseProductRepository.findByProductId(productId)
-                    .orElseThrow(() -> new NoSpecifiedProductInWarehouseBusinessException(productId));
+            WarehouseProductEntity product = productMap.get(productId);
+
+            if (product == null) {
+                throw new NoSpecifiedProductInWarehouseBusinessException(productId);
+            }
 
             if (product.getQuantity() < requiredQuantity) {
                 insufficientProducts.put(productId, requiredQuantity - product.getQuantity().intValue());
