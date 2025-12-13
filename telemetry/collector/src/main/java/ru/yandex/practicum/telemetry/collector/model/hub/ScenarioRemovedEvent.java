@@ -11,6 +11,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@Deprecated
 public class ScenarioRemovedEvent extends HubEvent {
     @NotBlank
     @Size(min = 3, max = 2147483647, message = "Длина должна быть от 3 до 2147483647 символов")

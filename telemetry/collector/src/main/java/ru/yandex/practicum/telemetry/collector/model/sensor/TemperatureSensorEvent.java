@@ -10,6 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@Deprecated
 public class TemperatureSensorEvent extends SensorEvent {
     @NotNull
     private int temperatureC;
@@ -18,6 +19,6 @@ public class TemperatureSensorEvent extends SensorEvent {
 
     @Override
     public SensorEventType getType() {
-        return SensorEventType.TEMPERATURE_SENSOR_EVENT;
+        return SensorEventType.TEMPERATURE_SENSOR_PROTO;
     }
 }

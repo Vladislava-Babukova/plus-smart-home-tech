@@ -10,6 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@Deprecated
 public class MotionSensorEvent extends SensorEvent {
     @NotNull
     private int linkQuality;
@@ -20,6 +21,6 @@ public class MotionSensorEvent extends SensorEvent {
 
     @Override
     public SensorEventType getType() {
-        return SensorEventType.MOTION_SENSOR_EVENT;
+        return SensorEventType.MOTION_SENSOR_PROTO;
     }
 }

@@ -33,3 +33,45 @@ services:
                              --partitions 1 --replication-factor 1 --if-not-exists \
                              --bootstrap-server kafka:29092'"
     init: true
+
+  analyzer-db:
+    image: postgres:16.1
+    container_name: analyzer-postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=analyzer
+      - POSTGRES_USER=db
+      - POSTGRES_PASSWORD=db
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  db-init:
+    image: postgres:16.1
+    container_name: db-init
+    depends_on:
+      analyzer-db:
+        condition: service_healthy
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -e
+        echo "Waiting for PostgreSQL to be ready..."
+        # Подключаемся к стандартной БД postgres
+        until psql postgresql://db:db@analyzer-db:5432/postgres -c '\q'; do
+          sleep 1
+        done
+        echo "Creating databases..."
+        psql postgresql://db:db@analyzer-db:5432/postgres -v ON_ERROR_STOP=1 <<-EOSQL
+        create database commerce_shopping_cart;
+        create database commerce_shopping_store;
+        create database commerce_warehouse;
+        create database commerce_order;
+        create database commerce_delivery;
+        create database commerce_payment;
+        EOSQL
+        echo "All databases created successfully!"

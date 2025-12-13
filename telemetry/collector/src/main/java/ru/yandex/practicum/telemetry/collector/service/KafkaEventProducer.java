@@ -1,5 +1,6 @@
 package ru.yandex.practicum.telemetry.collector.service;
 
+
 import jakarta.annotation.PreDestroy;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;

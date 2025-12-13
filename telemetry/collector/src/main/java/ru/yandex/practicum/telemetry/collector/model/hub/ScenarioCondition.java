@@ -9,6 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@Deprecated
 public class ScenarioCondition {
     private String sensorId;
     private ScenarioConditionType type;

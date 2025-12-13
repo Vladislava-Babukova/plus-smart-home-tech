@@ -9,12 +9,13 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@Deprecated
 public class LightSensorEvent extends SensorEvent {
     private int linkQuality;
     private int luminosity;
 
     @Override
     public SensorEventType getType() {
-        return SensorEventType.LIGHT_SENSOR_EVENT;
+        return SensorEventType.LIGHT_SENSOR_PROTO;
     }
 }

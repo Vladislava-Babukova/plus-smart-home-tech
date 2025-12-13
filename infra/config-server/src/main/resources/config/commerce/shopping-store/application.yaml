@@ -1,0 +1,44 @@
+server:
+  port: 0
+
+spring:
+  sql:
+    init:
+      mode: always
+  #DB connection
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/commerce_shopping_store
+    username: db
+    password: db
+    initialization-mode: always
+  jpa:
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc.time_zone: UTC
+        format_sql: true
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        initial-interval: 3000
+        max-attempts: 10
+        max-interval: 10000
+
+logging:
+  level:
+    ru:
+      yandex:
+        practicum: DEBUG
+    org:
+      springframework:
+        orm:
+          jpa: DEBUG
+        transaction: DEBUG
+  root: INFO
