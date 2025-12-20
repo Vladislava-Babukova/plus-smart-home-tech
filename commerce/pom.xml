@@ -13,9 +13,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>interaction-api</module>
-        <module>warehouse</module>
         <module>shopping-store</module>
         <module>shopping-cart</module>
+        <module>warehouse</module>
+        <module>interaction-api</module>
     </modules>
+
 </project>

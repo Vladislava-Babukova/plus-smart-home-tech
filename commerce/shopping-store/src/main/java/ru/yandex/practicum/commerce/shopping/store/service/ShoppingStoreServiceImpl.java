@@ -2,6 +2,8 @@ package ru.yandex.practicum.commerce.shopping.store.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     private final ProductRepository productRepository;
 
     @Override
+    @Cacheable(cacheNames = "products")
     public Page<ProductDto> getProducts(ProductCategory category, int page, int size, String sort) {
         log.debug("Getting products for category: {}, page: {}, size: {}, sort: {}",
                 category, page, size, sort);
@@ -39,6 +42,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     @Transactional
     public ProductDto createProduct(ProductDto productDto) {
         log.debug("Creating new product: {}", productDto.getProductName());
@@ -51,6 +55,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     @Transactional
     public ProductDto updateProduct(ProductDto productDto) {
         log.debug("Updating product with id: {}", productDto.getProductId());
@@ -66,6 +71,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     @Transactional
     public boolean removeProductFromStore(UUID productId) {
         log.debug("Removing product from store with id: {}", productId);
@@ -80,6 +86,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     @Transactional
     public boolean setProductQuantityState(SetProductQuantityStateRequest request) {
         log.debug("Setting quantity state for product: {} to {}",
@@ -96,6 +103,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     }
 
     @Override
+    @Cacheable(cacheNames = "products")
     public ProductDto getProduct(UUID productId) {
         log.debug("Getting product with id: {}", productId);
 

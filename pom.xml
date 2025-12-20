@@ -21,6 +21,9 @@
         <module>commerce</module>
         <module>infra/config-server</module>
         <module>infra/discovery-server</module>
+        <module>commerce/order</module>
+        <module>commerce/payment</module>
+        <module>commerce/delivery</module>
     </modules>
 
     <properties>

@@ -15,6 +15,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import ru.yandex.practicum.commerce.dto.warehouse.exception.NoSpecifiedProductInWarehouseException;
+import ru.yandex.practicum.commerce.dto.warehouse.exception.ProductInShoppingCartLowQuantityInWarehouse;
+import ru.yandex.practicum.commerce.dto.warehouse.exception.ProductInShoppingCartNotInWarehouse;
+import ru.yandex.practicum.commerce.dto.warehouse.exception.SpecifiedProductAlreadyInWarehouseException;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -76,7 +92,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ProductInShoppingCartNotInWarehouseBusinessException.class)
+    public ResponseEntity<ProductInShoppingCartNotInWarehouse> handleProductNotInWarehouse(
+            ProductInShoppingCartNotInWarehouseBusinessException ex, WebRequest request) {
 
+        log.warn("Product not found in warehouse: {}", ex.getProductId());
+
+        ProductInShoppingCartNotInWarehouse errorResponse = ProductInShoppingCartNotInWarehouse.builder()
+                .message(ex.getMessage())
+                .userMessage("Ошибка, товар из корзины отсутствует в БД склада")
+                .httpStatus(HttpStatus.BAD_REQUEST)
+                .localizedMessage(ex.getLocalizedMessage())
+                .stackTrace(convertStackTraceForProductNotInWarehouse(ex.getStackTrace()))
+                .cause(convertThrowableCauseForProductNotInWarehouse(ex.getCause()))
+                .suppressed(convertSuppressedForProductNotInWarehouse(ex.getSuppressed()))
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    // Методы для SpecifiedProductAlreadyInWarehouseException
     private List<SpecifiedProductAlreadyInWarehouseException.StackTraceElement> convertStackTraceForProductAlready(java.lang.StackTraceElement[] stackTrace) {
         if (stackTrace == null) return Collections.emptyList();
         return Arrays.stream(stackTrace)
@@ -113,7 +148,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-
+    // Методы для ProductInShoppingCartLowQuantityInWarehouse
     private List<ProductInShoppingCartLowQuantityInWarehouse.StackTraceElement> convertStackTraceForLowQuantity(java.lang.StackTraceElement[] stackTrace) {
         if (stackTrace == null) return Collections.emptyList();
         return Arrays.stream(stackTrace)
@@ -150,7 +185,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-
+    // Методы для NoSpecifiedProductInWarehouseException
     private List<NoSpecifiedProductInWarehouseException.StackTraceElement> convertStackTraceForNoProduct(java.lang.StackTraceElement[] stackTrace) {
         if (stackTrace == null) return Collections.emptyList();
         return Arrays.stream(stackTrace)
@@ -187,7 +222,44 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    // Методы для ProductInShoppingCartNotInWarehouse
+    private List<ProductInShoppingCartNotInWarehouse.StackTraceElement> convertStackTraceForProductNotInWarehouse(java.lang.StackTraceElement[] stackTrace) {
+        if (stackTrace == null) return Collections.emptyList();
+        return Arrays.stream(stackTrace)
+                .map(this::convertStackTraceElementForProductNotInWarehouse)
+                .collect(Collectors.toList());
+    }
 
+    private ProductInShoppingCartNotInWarehouse.StackTraceElement convertStackTraceElementForProductNotInWarehouse(java.lang.StackTraceElement element) {
+        return ProductInShoppingCartNotInWarehouse.StackTraceElement.builder()
+                .classLoaderName(element.getClassLoaderName())
+                .moduleName(element.getModuleName())
+                .moduleVersion(element.getModuleVersion())
+                .methodName(element.getMethodName())
+                .fileName(element.getFileName())
+                .lineNumber(element.getLineNumber())
+                .className(element.getClassName())
+                .nativeMethod(element.isNativeMethod())
+                .build();
+    }
+
+    private List<ProductInShoppingCartNotInWarehouse.ThrowableCause> convertSuppressedForProductNotInWarehouse(Throwable[] suppressed) {
+        if (suppressed == null || suppressed.length == 0) return Collections.emptyList();
+        return Arrays.stream(suppressed)
+                .map(this::convertThrowableCauseForProductNotInWarehouse)
+                .collect(Collectors.toList());
+    }
+
+    private ProductInShoppingCartNotInWarehouse.ThrowableCause convertThrowableCauseForProductNotInWarehouse(Throwable throwable) {
+        if (throwable == null) return null;
+        return ProductInShoppingCartNotInWarehouse.ThrowableCause.builder()
+                .message(throwable.getMessage())
+                .localizedMessage(throwable.getLocalizedMessage())
+                .stackTrace(convertStackTraceForProductNotInWarehouse(throwable.getStackTrace()))
+                .build();
+    }
+
+    // Общий обработчик
     @ExceptionHandler(Exception.class)
     public ResponseEntity<SpecifiedProductAlreadyInWarehouseException> handleGenericException(
             Exception ex, WebRequest request) {

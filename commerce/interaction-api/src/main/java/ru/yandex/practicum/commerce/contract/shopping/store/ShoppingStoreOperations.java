@@ -1,8 +1,8 @@
 package ru.yandex.practicum.commerce.contract.shopping.store;
 
-import org.springframework.data.domain.Page;
 import ru.yandex.practicum.commerce.dto.shopping.store.ProductCategory;
 import ru.yandex.practicum.commerce.dto.shopping.store.ProductDto;
+import org.springframework.data.domain.Page;
 import ru.yandex.practicum.commerce.dto.shopping.store.QuantityState;
 
 import java.util.UUID;
