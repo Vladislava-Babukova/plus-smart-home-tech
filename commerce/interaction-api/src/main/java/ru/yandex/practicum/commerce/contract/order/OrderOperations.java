@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface OrderOperations {
 
-    @org.jetbrains.annotations.NotNull List<Object> getClientOrders(String username);
+    @org.jetbrains.annotations.NotNull List<OrderDto> getClientOrders(String username);
 
     OrderDto createNewOrder(String username, CreateNewOrderRequest request);
 

@@ -46,6 +46,14 @@
             <version>24.1.0</version>
             <scope>compile</scope>
         </dependency>
+
+
+        <dependency>
+            <groupId>ru.yandex.practicum</groupId>
+            <artifactId>order</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>
