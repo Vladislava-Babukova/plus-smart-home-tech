@@ -1,6 +1,5 @@
 package ru.yandex.practicum.commerce.contract.warehouse;
 
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.commerce.dto.shopping.cart.ShoppingCartDto;
 import ru.yandex.practicum.commerce.dto.warehouse.*;
 

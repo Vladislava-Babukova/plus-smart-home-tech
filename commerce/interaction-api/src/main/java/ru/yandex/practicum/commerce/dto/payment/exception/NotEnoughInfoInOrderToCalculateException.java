@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
-import ru.yandex.practicum.commerce.dto.order.exception.NoOrderFoundException;
 
 import java.util.List;
 

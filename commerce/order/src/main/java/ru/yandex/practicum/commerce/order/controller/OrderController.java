@@ -3,6 +3,7 @@ package ru.yandex.practicum.commerce.order.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.commerce.contract.order.OrderOperations;
 import ru.yandex.practicum.commerce.dto.order.CreateNewOrderRequest;
 import ru.yandex.practicum.commerce.dto.order.OrderDto;
 import ru.yandex.practicum.commerce.dto.order.ProductReturnRequest;
@@ -32,6 +33,8 @@ public class OrderController implements OrderOperations {
     @PutMapping
     public OrderDto createNewOrder(@RequestParam String username,
                                    @RequestBody CreateNewOrderRequest request) {
+        //В этом методе будем передавать username по аналогии с shopping-cart, чтобы мы могли сохранять
+        //username в БД и возвращать для метода выше.
         log.debug("Creating new order from shopping cart: {}", request.getShoppingCart().getShoppingCartId());
         OrderDto order = orderService.createNewOrder(username, request);
         log.debug("Return created order: {}", order.getOrderId());

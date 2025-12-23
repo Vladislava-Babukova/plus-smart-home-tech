@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
-public class WarehouseClientFallback  implements WarehouseClient {
+public class WarehouseClientFallback implements WarehouseClient {
     @Override
     public void newProductInWarehouse(NewProductInWarehouseRequest request) {
         throw new RuntimeException("Warehouse service is unavailable");

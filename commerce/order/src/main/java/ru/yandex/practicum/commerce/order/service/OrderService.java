@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface OrderService {
 
-    @org.jetbrains.annotations.NotNull List<Object> getClientOrders(String username);
+    List<OrderDto> getClientOrders(String username);
 
     OrderDto createNewOrder(String username, CreateNewOrderRequest request);
 

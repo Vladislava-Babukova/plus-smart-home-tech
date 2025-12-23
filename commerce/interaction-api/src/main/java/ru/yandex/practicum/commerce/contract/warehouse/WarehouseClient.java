@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @FeignClient(name = "warehouse", fallback = WarehouseClientFallback.class)
-public interface WarehouseClient extends WarehouseOperations{
+public interface WarehouseClient extends WarehouseOperations {
 
     @PutMapping("/api/v1/warehouse")
     void newProductInWarehouse(@RequestBody NewProductInWarehouseRequest request);

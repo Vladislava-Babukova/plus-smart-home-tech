@@ -40,6 +40,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>24.1.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -51,7 +57,7 @@
                     <layers>
                         <enabled>true</enabled>
                     </layers>
-                    <skip>true</skip>  <!-- Не приложение, а библиотека, но мне нужен ломбок -->
+                    <skip>true</skip>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
