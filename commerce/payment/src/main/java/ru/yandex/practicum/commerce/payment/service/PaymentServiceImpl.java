@@ -18,7 +18,6 @@ import ru.yandex.practicum.commerce.payment.model.PaymentState;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -67,18 +66,28 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("Calculating product cost for order: {}", orderDto.getOrderId());
         validateOrderForCalculation(orderDto);
 
-        BigDecimal totalProductCost = BigDecimal.ZERO;
+        BigDecimal totalProductCost = orderDto.getProducts().entrySet().parallelStream()
+                .map(entry -> {
+                    UUID productId = entry.getKey();
+                    Integer quantity = entry.getValue();
 
-        for (Map.Entry<UUID, Integer> entry : orderDto.getProducts().entrySet()) {
-            UUID productId = entry.getKey();
-            Integer quantity = entry.getValue();
+                    try {
+                        ProductDto product = shoppingStoreClient.getProduct(productId);
 
-            ProductDto product = shoppingStoreClient.getProduct(productId);
-            BigDecimal productPrice = product.getPrice();
-
-            BigDecimal productTotal = productPrice.multiply(BigDecimal.valueOf(quantity));
-            totalProductCost = totalProductCost.add(productTotal);
-        }
+                        if (product != null && product.getPrice() != null) {
+                            return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+                        } else {
+                            log.warn("Product {} not found or has no price for order: {}",
+                                    productId, orderDto.getOrderId());
+                            return BigDecimal.ZERO;
+                        }
+                    } catch (Exception e) {
+                        log.warn("Error fetching product {}: {} for order: {}",
+                                productId, e.getMessage(), orderDto.getOrderId());
+                        return BigDecimal.ZERO;
+                    }
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         log.debug("Calculated product cost for order {}: {}", orderDto.getOrderId(), totalProductCost);
         return totalProductCost.setScale(SCALE, ROUNDING_MODE);

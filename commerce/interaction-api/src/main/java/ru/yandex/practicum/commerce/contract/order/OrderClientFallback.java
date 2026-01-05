@@ -7,7 +7,7 @@ import ru.yandex.practicum.commerce.dto.order.ProductReturnRequest;
 import java.util.List;
 import java.util.UUID;
 
-public class OrderClientFallback implements OrderClient{
+public class OrderClientFallback implements OrderClient {
     @Override
     public List<OrderDto> getClientOrders(String username) {
         throw new RuntimeException("Order service is unavailable");

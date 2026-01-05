@@ -12,6 +12,8 @@ import java.util.UUID;
 
 public interface DeliveryRepository extends JpaRepository<DeliveryEntity, UUID> {
 
+    boolean existsByOrderId(Long orderId);
+
     Optional<DeliveryEntity> findByOrderId(UUID orderId);
 
     List<DeliveryEntity> findByDeliveryState(DeliveryState state);
@@ -24,4 +26,6 @@ public interface DeliveryRepository extends JpaRepository<DeliveryEntity, UUID> 
 
     @Query("SELECT d FROM DeliveryEntity d WHERE d.toAddress.city = :city")
     List<DeliveryEntity> findByCity(@Param("city") String city);
+
+    boolean existsByOrderId(UUID orderId);
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.commerce.contract.delivery.DeliveryClient;
 import ru.yandex.practicum.commerce.contract.payment.PaymentClient;
 import ru.yandex.practicum.commerce.contract.warehouse.WarehouseClient;
 import ru.yandex.practicum.commerce.dto.delivery.DeliveryDto;
@@ -24,7 +25,6 @@ import ru.yandex.practicum.commerce.order.exception.NotAuthorizedBusinessExcepti
 import ru.yandex.practicum.commerce.order.mapper.OrderMapper;
 import ru.yandex.practicum.commerce.order.model.OrderEntity;
 import ru.yandex.practicum.commerce.order.model.OrderItemEntity;
-import ru.yandex.practicum.commerce.contract.delivery.DeliveryClient;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -72,7 +72,7 @@ public class OrderServiceImpl implements OrderService {
         BookedProductsDto bookedProductsDto;
         // Проверяем доступность товаров на складе через Feign клиент и получаем габариты
         try {
-            bookedProductsDto =  warehouseClient.checkProductQuantityEnoughForShoppingCart(tempCart);
+            bookedProductsDto = warehouseClient.checkProductQuantityEnoughForShoppingCart(tempCart);
             log.debug("Products availability confirmed by warehouse");
         } catch (Exception e) {
             log.error("Failed to check product availability in warehouse: {}", e.getMessage());
