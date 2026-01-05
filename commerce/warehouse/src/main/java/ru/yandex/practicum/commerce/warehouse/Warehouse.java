@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-@EnableFeignClients
+@EnableFeignClients(basePackages = "ru.yandex.practicum.commerce.contract")
 public class Warehouse {
     public static void main(String[] args) {
         SpringApplication.run(Warehouse.class, args);

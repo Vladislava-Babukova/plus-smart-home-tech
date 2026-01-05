@@ -11,5 +11,8 @@
 
     <artifactId>infra</artifactId>
     <packaging>pom</packaging>
+    <modules>
+        <module>gateway</module>
+    </modules>
 
 </project>
